@@ -1,7 +1,30 @@
 <?php
 
 require_once 'autoload.php';
-$acts=DB::avionAct();
+
+if ($_POST) {
+  if ($_POST['form']=='1') {
+    $estado=$_POST['estado'];
+
+    $acts=DB::getPlaneByEstado($estado);
+
+
+  }elseif ($_POST['form']=='3') {
+    $acts=DB::getPlaneByTitulo($_POST['Bti']);
+
+
+  }else {
+    $leg=$_POST['Bus'];
+
+    $user=DB::getUserByLeg($leg);
+
+
+    $acts=DB::avionActByUser($user['idUsuarios']);
+  }
+
+}else{
+  $acts=DB::avionAct();
+}
 
 $pageTitle = 'home';
 require_once 'partials/head.php';
@@ -11,41 +34,36 @@ require_once 'partials/navbar.php';
   <?php   require_once 'partials/subNav.php' ?>
   <div class="busca">
     <div class="forms">
-      <form class="" action="allTask.php" method="post">
+
+
+
+      <form class="" action="aviones.php" method="post">
         <label for="estado">Estado</label>
         <select class="" name="estado">
-          <option value="pendiente">Pendiente</option>
-          <option value="tomado">Tomado</option>
-          <option value="finalizado">Finalizado</option>
-
+          <option value=1>Actualizado</option>
+          <option value=0>Pendiente</option>
         </select>
         <input type="hidden" name="form" value="1">
         <button type="submit" name="button">Buscar</button>
-      </form>
-      <form class="" action="allTask.php" method="post">
-        <label for="prioridad">Prioridad</label>
-        <select class="" name="prioridad">
-          <option value="baja">Baja</option>
-          <option value="media">Media</option>
-          <option value="alta">Alta</option>
-          <option value="urgente">Urgente</option>
 
-        </select>
-        <input type="hidden" name="form" value="2">
-        <button type="submit" name="button">Buscar</button>
       </form>
-      <form class="" action="allTask.php" method="post">
+
+      <form class="" action="aviones.php" method="post">
         <label for="Bti">Buscar por Titulo</label>
         <input type="text" name="Bti" value="" placeholder="Buscar por titulo">
         <input type="hidden" name="form" value="3">
         <button type="submit" name="button">Buscar</button>
       </form>
-      <form class="" action="allTask.php" method="post">
+
+
+
+      <form class="" action="aviones.php" method="post">
         <label for="Bus">Ingrese Legajo</label>
         <input type="text" name="Bus" value="" placeholder="Buscar por Usuario">
         <input type="hidden" name="form" value="4">
         <button type="submit" name="button">Buscar</button>
       </form>
+
   </div>
     <table style='width:70%'>
       <tr>
@@ -55,9 +73,7 @@ require_once 'partials/navbar.php';
         <td><strong style='text-align:center'><p>Usuario</p></strong> </td>
 
       </tr>
-      <form class="" action="edit.php" method="post">
 
-      <button type="submit" name="button">Editar Tarea</button>
 
       <?php foreach ($acts as $act): ?>
 
@@ -65,21 +81,25 @@ require_once 'partials/navbar.php';
 
 
 
-        $tarea=DB::getTaskById($act['idtarea']);
+        $tarea=DB::getTaskById($act->getTarea());
 
-        $avion=DB::getPlaneById($act['idavion']);
+        $avion=DB::getPlaneById($act->getAvion());
 
          ?>
         <tr>
           <td style='text-align:center'><?php echo $tarea['titulo']; ?></td>
           <td style='text-align:center'><?php echo $avion['Matricula'] ;?> </td>
-          <?php if ($act['actualizado']!='1'): ?>
+          <?php if ($act->getActualizado()=='0'): ?>
             <td style='text-align:center'><?php echo 'pendiente'; ?> </td>
           <?php else: ?>
             <td style='text-align:center'><?php echo 'actualizado'; ?> </td>
           <?php endif; ?>
-          <?php if ($act['idusuario']!=0): ?>
-            <td style='text-align:center'><?php $user=DB::getUserById($act['idusuario']);
+          <?php if ($act->getUser()!='0'): ?>
+            <td style='text-align:center'><?php
+            $idU=$act->getUser();
+
+             $user=DB::getUserById($idU);
+
             echo $user['Nombre']; ?></td>
 
           <?php else: ?>
@@ -87,7 +107,7 @@ require_once 'partials/navbar.php';
           <?php endif; ?>
         </tr>
         <?php endforeach; ?>
-    </form>
+
       </table>
     </div>
 

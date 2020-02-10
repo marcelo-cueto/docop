@@ -31,7 +31,7 @@
     $idtarea=DB::getLastTaskById();
     $id=$idtarea['idtareas'];
     $num=count($_FILES['archivos']['name']);
-      
+
         for ($i=0; $i <$num ; $i++) {
 
 
@@ -65,10 +65,10 @@
        $new=new Tareavion($id,$avion['idAviones']);
        DB::savePlane($new);
       }
-      header('Location: home.php');
+
     }
 
-
+header('Location: home.php');
 
 
 

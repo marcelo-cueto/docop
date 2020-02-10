@@ -298,7 +298,7 @@
 				$stmt = $connection->prepare("
 					SELECT *
 					FROM aviones
-					
+
 
 				");
 
@@ -321,7 +321,20 @@
 			$stmt->execute();
 			$tareas = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-			return $tareas;
+			$tareasObject = [];
+			foreach ($tareas as $tarea) {
+
+				$finaltomados = new Tareavion($tarea['idtarea'], $tarea['idavion'],$tarea['idusuario'], $tarea['actualizado']);
+
+				$finaltomados->setId($tarea['idtareavion']);
+
+
+
+				$tareasObject[] = $finaltomados;
+
+			}
+
+			return $tareasObject;
 
 
 
@@ -342,6 +355,33 @@
 			$pendientesObject = [];
 			foreach ($pendientes as $pendiente) {
 				$finalpendientes = new Tareavion($pendiente['idtarea'], $pendiente['idavion']);
+
+				$finalpendientes->setId($pendiente['idtareavion']);
+
+
+
+				$pendientesObject[] = $finalpendientes;
+
+			}
+			return $pendientesObject;
+		}
+		public static function avionActByUser($id){
+			global $connection;
+
+			$stmt = $connection->prepare("
+			   SELECT *
+				 FROM tareavion
+				 WHERE idusuario=$id
+
+				 ");
+
+
+			$stmt->execute();
+			$pendientes = $stmt->fetchAll();
+
+			$pendientesObject = [];
+			foreach ($pendientes as $pendiente) {
+				$finalpendientes = new Tareavion($pendiente['idtarea'], $pendiente['idavion'],$pendiente['idusuario'] , $pendiente['actualizado']);
 
 				$finalpendientes->setId($pendiente['idtareavion']);
 
@@ -420,7 +460,7 @@
 				$finaltomados->setFecha_toma($tomado['fecha_toma']);
 				$finaltomados->setUsuario($tomado['idUsuario']);
 				$finaltomados->setFecha_finalizacion($tomado['fecha_finalizacion']);
-				$finaltomados->setUsuario($tomado['avion']);
+				$finaltomados->setAvion($tomado['avion']);
 
 
 				$tomadosObject[] = $finaltomados;
@@ -481,7 +521,7 @@
 			$stmt = $connection->prepare("
 				SELECT *
 				FROM Usuarios
-				WHERE idUsuarios = $id
+				WHERE idUsuarios = '$id'
 			");
 
 			$stmt->execute();
@@ -651,15 +691,15 @@
 
 
 		}
-		public static function getByEstado($estado)
+		public static function getPlaneByEstado($estado)
 		{
 
 			global $connection;
 			$stmt = $connection->prepare("
 				SELECT *
-				FROM tareas
-				WHERE estado = '$estado'
-				ORDER BY fecha_creacion
+				FROM tareavion
+				WHERE actualizado = $estado
+
 			");
 
 			$stmt->execute();
@@ -668,23 +708,67 @@
 			$tareasObject = [];
 			foreach ($tareas as $tarea) {
 
-				$finaltomados = new Tarea($tarea['tarea'], $tarea['prioridad'], $tarea['fecha_creacion'],$tarea['titulo'],$tarea['idSector']);
+				$finaltomados = new Tareavion($tarea['idtarea'], $tarea['idavion'],$tarea['idusuario'], $tarea['actualizado']);
 
-				$finaltomados->setId($tarea['idtareas']);
-				$finaltomados->setEstado($tarea['estado']);
-				$finaltomados->setFecha_toma($tarea['fecha_toma']);
-				$finaltomados->setUsuario($tarea['idUsuario']);
-				$finaltomados->setFecha_finalizacion($tarea['fecha_finalizacion']);
+				$finaltomados->setId($tarea['idtareavion']);
+
 
 
 				$tareasObject[] = $finaltomados;
 
 			}
+
 			return $tareasObject;
 
 
 
 		}
+		public static function getPlaneByTitulo($titulo)
+		{
+
+			global $connection;
+			$stmt = $connection->prepare("
+				SELECT *
+				FROM tareas
+				WHERE titulo LIKE '%$titulo%'
+			  AND avion = 1
+			");
+			$stmt->execute();
+			$tareas = $stmt->fetchAll();
+
+			$tareasObject = [];
+			foreach ($tareas as $tarea) {
+				$c=$tarea['idtareas'];
+
+				$st = $connection->prepare("
+					SELECT *
+					FROM tareavion
+					WHERE idtarea = 	$c
+
+				");
+
+				$st->execute();
+				$tareavion = $st->fetchAll();
+				foreach ($tareavion as $tv) {
+					$finaltomados = new Tareavion($tv['idtarea'], $tv['idavion']);
+
+					$finaltomados->setId($tv['idtareavion']);
+					$finaltomados->setUser($tv['idusuario']);
+					$finaltomados->setActualizado($tv['Actualizado']);
+
+
+					$tareasObject[] = $finaltomados;
+				}
+
+					
+			}
+			return $tareasObject;
+		}
+
+
+
+
+
 		public static function getByPiroridad($prioridad)
 		{
 
